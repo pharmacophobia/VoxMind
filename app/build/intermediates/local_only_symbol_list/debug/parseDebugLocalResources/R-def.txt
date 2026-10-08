@@ -1,0 +1,12 @@
+R_DEF: Internal format may change without notice
+local
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+string channel_alarms_desc
+string channel_alarms_name
+string channel_reminders_desc
+string channel_reminders_name
+string channel_timers_desc
+string channel_timers_name
+style Theme.VoxMind

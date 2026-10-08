@@ -1,0 +1,239 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.voxmind.app"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="34" />
+10
+11    <!-- Audio & Speech Recognition Permissions -->
+12    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+12-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:5:5-71
+12-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:5:22-68
+13
+14    <!-- Notifications & Alarms -->
+15    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+15-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:8:5-77
+15-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:8:22-74
+16    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+16-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:9:5-79
+16-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:9:22-76
+17    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+17-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:10:5-74
+17-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:10:22-71
+18    <uses-permission android:name="android.permission.WAKE_LOCK" />
+18-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:11:5-68
+18-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:11:22-65
+19    <uses-permission android:name="android.permission.VIBRATE" />
+19-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:12:5-66
+19-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:12:22-63
+20    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+20-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:13:5-81
+20-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:13:22-78
+21
+22    <!-- SMS Dispatch for Text Message Reminders -->
+23    <uses-permission android:name="android.permission.SEND_SMS" />
+23-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:16:5-67
+23-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:16:22-64
+24
+25    <!-- Internet for DeepSeek AI API -->
+26    <uses-permission android:name="android.permission.INTERNET" />
+26-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:19:5-67
+26-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:19:22-64
+27    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+27-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:20:5-79
+27-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:20:22-76
+28
+29    <!-- Speech Recognizer queries for Android 11+ (API 30+) -->
+30    <queries>
+30-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:23:5-27:15
+31        <intent>
+31-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:24:9-26:18
+32            <action android:name="android.speech.RecognitionService" />
+32-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:25:13-72
+32-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:25:21-69
+33        </intent>
+34    </queries>
+35
+36    <permission
+36-->[androidx.core:core:1.13.1] /home/k/.gradle/caches/8.9/transforms/bf2978fafc49e8113c2a781e4029cadc/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+37        android:name="com.voxmind.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+37-->[androidx.core:core:1.13.1] /home/k/.gradle/caches/8.9/transforms/bf2978fafc49e8113c2a781e4029cadc/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+38        android:protectionLevel="signature" />
+38-->[androidx.core:core:1.13.1] /home/k/.gradle/caches/8.9/transforms/bf2978fafc49e8113c2a781e4029cadc/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+39
+40    <uses-permission android:name="com.voxmind.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+40-->[androidx.core:core:1.13.1] /home/k/.gradle/caches/8.9/transforms/bf2978fafc49e8113c2a781e4029cadc/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+40-->[androidx.core:core:1.13.1] /home/k/.gradle/caches/8.9/transforms/bf2978fafc49e8113c2a781e4029cadc/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+41
+42    <application
+42-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:29:5-72:19
+43        android:allowBackup="true"
+43-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:30:9-35
+44        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+44-->[androidx.core:core:1.13.1] /home/k/.gradle/caches/8.9/transforms/bf2978fafc49e8113c2a781e4029cadc/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+45        android:debuggable="true"
+46        android:extractNativeLibs="false"
+47        android:icon="@mipmap/ic_launcher"
+47-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:31:9-43
+48        android:label="@string/app_name"
+48-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:32:9-41
+49        android:roundIcon="@mipmap/ic_launcher_round"
+49-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:33:9-54
+50        android:supportsRtl="true"
+50-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:34:9-35
+51        android:theme="@style/Theme.VoxMind" >
+51-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:35:9-45
+52        <activity
+52-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:37:9-46:20
+53            android:name="com.voxmind.app.MainActivity"
+53-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:38:13-41
+54            android:exported="true"
+54-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:39:13-36
+55            android:theme="@style/Theme.VoxMind"
+55-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:41:13-49
+56            android:windowSoftInputMode="adjustResize" >
+56-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:40:13-55
+57            <intent-filter>
+57-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:42:13-45:29
+58                <action android:name="android.intent.action.MAIN" />
+58-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:43:17-69
+58-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:43:25-66
+59
+60                <category android:name="android.intent.category.LAUNCHER" />
+60-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:44:17-77
+60-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:44:27-74
+61            </intent-filter>
+62        </activity>
+63
+64        <!-- Broadcast Receiver for Reminders, Alarms & Timers -->
+65        <receiver
+65-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:49:9-60:20
+66            android:name="com.voxmind.app.receiver.AlarmReceiver"
+66-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:50:13-51
+67            android:exported="false" >
+67-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:51:13-37
+68            <intent-filter>
+68-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:52:13-59:29
+69                <action android:name="com.voxmind.app.ACTION_TRIGGER_REMINDER" />
+69-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:53:17-82
+69-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:53:25-79
+70                <action android:name="com.voxmind.app.ACTION_TRIGGER_ALARM" />
+70-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:54:17-79
+70-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:54:25-76
+71                <action android:name="com.voxmind.app.ACTION_TRIGGER_TIMER" />
+71-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:55:17-79
+71-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:55:25-76
+72                <action android:name="com.voxmind.app.ACTION_SNOOZE" />
+72-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:56:17-72
+72-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:56:25-69
+73                <action android:name="com.voxmind.app.ACTION_DISMISS" />
+73-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:57:17-73
+73-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:57:25-70
+74                <action android:name="com.voxmind.app.ACTION_MARK_DONE" />
+74-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:58:17-75
+74-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:58:25-72
+75            </intent-filter>
+76        </receiver>
+77
+78        <!-- Device Boot Rescheduler -->
+79        <receiver
+79-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:63:9-70:20
+80            android:name="com.voxmind.app.receiver.BootReceiver"
+80-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:64:13-50
+81            android:exported="true" >
+81-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:65:13-36
+82            <intent-filter>
+82-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:66:13-69:29
+83                <action android:name="android.intent.action.BOOT_COMPLETED" />
+83-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:67:17-79
+83-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:67:25-76
+84                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+84-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:68:17-84
+84-->/home/k/VoxMind/app/src/main/AndroidManifest.xml:68:25-81
+85            </intent-filter>
+86        </receiver>
+87
+88        <activity
+88-->[androidx.compose.ui:ui-tooling-android:1.6.8] /home/k/.gradle/caches/8.9/transforms/9d8c105f9bd168175972039030233b7c/transformed/ui-tooling-release/AndroidManifest.xml:23:9-25:39
+89            android:name="androidx.compose.ui.tooling.PreviewActivity"
+89-->[androidx.compose.ui:ui-tooling-android:1.6.8] /home/k/.gradle/caches/8.9/transforms/9d8c105f9bd168175972039030233b7c/transformed/ui-tooling-release/AndroidManifest.xml:24:13-71
+90            android:exported="true" />
+90-->[androidx.compose.ui:ui-tooling-android:1.6.8] /home/k/.gradle/caches/8.9/transforms/9d8c105f9bd168175972039030233b7c/transformed/ui-tooling-release/AndroidManifest.xml:25:13-36
+91        <activity
+91-->[androidx.compose.ui:ui-test-manifest:1.6.8] /home/k/.gradle/caches/8.9/transforms/96c6fe42c25e9c15178e278bef2badd6/transformed/ui-test-manifest-1.6.8/AndroidManifest.xml:23:9-25:39
+92            android:name="androidx.activity.ComponentActivity"
+92-->[androidx.compose.ui:ui-test-manifest:1.6.8] /home/k/.gradle/caches/8.9/transforms/96c6fe42c25e9c15178e278bef2badd6/transformed/ui-test-manifest-1.6.8/AndroidManifest.xml:24:13-63
+93            android:exported="true" />
+93-->[androidx.compose.ui:ui-test-manifest:1.6.8] /home/k/.gradle/caches/8.9/transforms/96c6fe42c25e9c15178e278bef2badd6/transformed/ui-test-manifest-1.6.8/AndroidManifest.xml:25:13-36
+94
+95        <provider
+95-->[androidx.emoji2:emoji2:1.3.0] /home/k/.gradle/caches/8.9/transforms/655687e7f2987f195f6f6296966a1818/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+96            android:name="androidx.startup.InitializationProvider"
+96-->[androidx.emoji2:emoji2:1.3.0] /home/k/.gradle/caches/8.9/transforms/655687e7f2987f195f6f6296966a1818/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+97            android:authorities="com.voxmind.app.androidx-startup"
+97-->[androidx.emoji2:emoji2:1.3.0] /home/k/.gradle/caches/8.9/transforms/655687e7f2987f195f6f6296966a1818/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+98            android:exported="false" >
+98-->[androidx.emoji2:emoji2:1.3.0] /home/k/.gradle/caches/8.9/transforms/655687e7f2987f195f6f6296966a1818/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+99            <meta-data
+99-->[androidx.emoji2:emoji2:1.3.0] /home/k/.gradle/caches/8.9/transforms/655687e7f2987f195f6f6296966a1818/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+100                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+100-->[androidx.emoji2:emoji2:1.3.0] /home/k/.gradle/caches/8.9/transforms/655687e7f2987f195f6f6296966a1818/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+101                android:value="androidx.startup" />
+101-->[androidx.emoji2:emoji2:1.3.0] /home/k/.gradle/caches/8.9/transforms/655687e7f2987f195f6f6296966a1818/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+102            <meta-data
+102-->[androidx.lifecycle:lifecycle-process:2.8.3] /home/k/.gradle/caches/8.9/transforms/58725960c9f1f3a73e9e0f9031a08600/transformed/lifecycle-process-2.8.3/AndroidManifest.xml:29:13-31:52
+103                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+103-->[androidx.lifecycle:lifecycle-process:2.8.3] /home/k/.gradle/caches/8.9/transforms/58725960c9f1f3a73e9e0f9031a08600/transformed/lifecycle-process-2.8.3/AndroidManifest.xml:30:17-78
+104                android:value="androidx.startup" />
+104-->[androidx.lifecycle:lifecycle-process:2.8.3] /home/k/.gradle/caches/8.9/transforms/58725960c9f1f3a73e9e0f9031a08600/transformed/lifecycle-process-2.8.3/AndroidManifest.xml:31:17-49
+105            <meta-data
+105-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+106                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+106-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+107                android:value="androidx.startup" />
+107-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+108        </provider>
+109
+110        <receiver
+110-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+111            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+111-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+112            android:directBootAware="false"
+112-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+113            android:enabled="true"
+113-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+114            android:exported="true"
+114-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+115            android:permission="android.permission.DUMP" >
+115-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+116            <intent-filter>
+116-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+117                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+117-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+117-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+118            </intent-filter>
+119            <intent-filter>
+119-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+120                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+120-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+120-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+121            </intent-filter>
+122            <intent-filter>
+122-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+123                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+123-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+123-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+124            </intent-filter>
+125            <intent-filter>
+125-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+126                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+126-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+126-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/k/.gradle/caches/8.9/transforms/3fba7c255d422eeb3c040067b093fec3/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+127            </intent-filter>
+128        </receiver>
+129    </application>
+130
+131</manifest>

@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.voxmind.app-debug-46:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.voxmind.app-main-48:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.voxmind.app-debug-46:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.voxmind.app-main-48:/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+]
