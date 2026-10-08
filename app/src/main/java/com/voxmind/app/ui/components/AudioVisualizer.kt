@@ -61,7 +61,7 @@ fun AudioVisualizer(
             return@Canvas
         }
 
-        val baseAmplitude = (rmsLevel.coerceIn(0.1f, 1.0f)) * (height * 0.42f)
+        val baseAmplitude = if (rmsLevel <= 0.01f) (height * 0.03f) else (rmsLevel.coerceIn(0f, 1f) * height * 0.45f)
 
         // Draw primary wave
         val path1 = Path()

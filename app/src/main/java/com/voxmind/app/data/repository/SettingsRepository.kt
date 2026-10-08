@@ -16,6 +16,8 @@ class SettingsRepository(context: Context) {
         private const val KEY_DEFAULT_PHONE = "default_phone"
         private const val KEY_DEFAULT_EMAIL = "default_email"
         private const val KEY_CONTINUOUS_SPEECH = "continuous_speech"
+        private const val KEY_MUTE_MIC_SOUNDS = "mute_mic_sounds"
+        private const val KEY_NOISE_GATE = "noise_gate_enabled"
         private const val KEY_DEFAULT_SMS_ENABLED = "default_sms_enabled"
         private const val KEY_DEFAULT_EMAIL_ENABLED = "default_email_enabled"
 
@@ -39,6 +41,12 @@ class SettingsRepository(context: Context) {
 
     private val _continuousSpeech = MutableStateFlow(prefs.getBoolean(KEY_CONTINUOUS_SPEECH, true))
     val continuousSpeech: StateFlow<Boolean> = _continuousSpeech.asStateFlow()
+
+    private val _muteMicSounds = MutableStateFlow(prefs.getBoolean(KEY_MUTE_MIC_SOUNDS, true))
+    val muteMicSounds: StateFlow<Boolean> = _muteMicSounds.asStateFlow()
+
+    private val _noiseGateEnabled = MutableStateFlow(prefs.getBoolean(KEY_NOISE_GATE, true))
+    val noiseGateEnabled: StateFlow<Boolean> = _noiseGateEnabled.asStateFlow()
 
     private val _defaultSmsEnabled = MutableStateFlow(prefs.getBoolean(KEY_DEFAULT_SMS_ENABLED, false))
     val defaultSmsEnabled: StateFlow<Boolean> = _defaultSmsEnabled.asStateFlow()
@@ -70,6 +78,16 @@ class SettingsRepository(context: Context) {
     fun setContinuousSpeech(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_CONTINUOUS_SPEECH, enabled).apply()
         _continuousSpeech.value = enabled
+    }
+
+    fun setMuteMicSounds(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_MUTE_MIC_SOUNDS, enabled).apply()
+        _muteMicSounds.value = enabled
+    }
+
+    fun setNoiseGateEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_NOISE_GATE, enabled).apply()
+        _noiseGateEnabled.value = enabled
     }
 
     fun setDefaultSmsEnabled(enabled: Boolean) {

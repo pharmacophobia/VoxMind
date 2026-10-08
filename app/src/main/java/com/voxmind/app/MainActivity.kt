@@ -41,7 +41,11 @@ class MainActivity : ComponentActivity() {
         settingsRepository = SettingsRepository(this)
         notificationHelper = NotificationHelper(this)
         alarmScheduler = AlarmScheduler(this)
-        speechManager = SpeechManager(this)
+        speechManager = SpeechManager(
+            context = this,
+            isMuteMicSoundsEnabled = { settingsRepository.muteMicSounds.value },
+            isNoiseGateEnabled = { settingsRepository.noiseGateEnabled.value }
+        )
         deepSeekClient = DeepSeekClient(
             apiKeyProvider = { settingsRepository.apiKey.value },
             modelProvider = { settingsRepository.model.value }

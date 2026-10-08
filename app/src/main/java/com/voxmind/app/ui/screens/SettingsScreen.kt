@@ -91,6 +91,8 @@ fun SettingsScreen(
     val defaultPhone by settingsRepo.defaultPhone.collectAsState()
     val defaultEmail by settingsRepo.defaultEmail.collectAsState()
     val continuousSpeech by settingsRepo.continuousSpeech.collectAsState()
+    val muteMicSounds by settingsRepo.muteMicSounds.collectAsState()
+    val noiseGateEnabled by settingsRepo.noiseGateEnabled.collectAsState()
 
     var inputKey by remember(apiKey) { mutableStateOf(apiKey) }
     var inputPhone by remember(defaultPhone) { mutableStateOf(defaultPhone) }
@@ -385,17 +387,24 @@ fun SettingsScreen(
         ) {
             Column(
                 modifier = Modifier.padding(14.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                Text(
+                    text = "🎙️ Voice Dictation & Audio",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                // 1. Continuous Dictation
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Continuous Voice Dictation", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Text("Continuous Voice Dictation", color = Color.White, fontSize = 14.sp)
                         Text(
-                            text = "Keep microphone listening continuously without cutting off after short pauses",
+                            text = "Keep microphone listening through pauses without stopping",
                             color = Color.Gray,
                             fontSize = 12.sp
                         )
@@ -407,6 +416,56 @@ fun SettingsScreen(
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = CyanAccent,
                             checkedTrackColor = CyanAccent.copy(alpha = 0.4f)
+                        )
+                    )
+                }
+
+                // 2. Silence Mic Noises / Beeps
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Mute Microphone Beeps & Earcons", color = Color.White, fontSize = 14.sp)
+                        Text(
+                            text = "Silences the loud system start/stop beeps and chime sounds during speech loops",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    Switch(
+                        checked = muteMicSounds,
+                        onCheckedChange = { settingsRepo.setMuteMicSounds(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = EmeraldSuccess,
+                            checkedTrackColor = EmeraldSuccess.copy(alpha = 0.4f)
+                        )
+                    )
+                }
+
+                // 3. Ambient Noise Gate
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Ambient Noise Gate & Filter", color = Color.White, fontSize = 14.sp)
+                        Text(
+                            text = "Filters out low-level room static, breathing, and background hiss",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    Switch(
+                        checked = noiseGateEnabled,
+                        onCheckedChange = { settingsRepo.setNoiseGateEnabled(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = IndigoPrimary,
+                            checkedTrackColor = IndigoPrimary.copy(alpha = 0.4f)
                         )
                     )
                 }
