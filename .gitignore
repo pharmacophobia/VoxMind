@@ -1,16 +1,13 @@
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+.gradle/
+build/
+app/build/
 local.properties
+/local.properties
+.DS_Store
+.idea/
+.externalNativeBuild/
+.cxx/
 
 # Ignore all apks by default except the root app APK
 *.apk
