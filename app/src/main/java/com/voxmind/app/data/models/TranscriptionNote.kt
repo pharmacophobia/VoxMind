@@ -10,6 +10,17 @@ data class ExtractedReminderItem(
     val isScheduled: Boolean = false
 )
 
+data class AutoSortedCategory(
+    val listTitle: String,
+    val items: List<String>
+)
+
+data class AutoSortSummary(
+    val totalItemsRouted: Int,
+    val listsAffected: List<String>,
+    val newListsCreated: Int
+)
+
 data class TranscriptionNote(
     val id: String = UUID.randomUUID().toString(),
     val title: String = "Voice Note",
@@ -18,5 +29,8 @@ data class TranscriptionNote(
     val bulletPoints: List<String> = emptyList(),
     val summary: String = "",
     val extractedReminders: List<ExtractedReminderItem> = emptyList(),
+    val isAutoSorted: Boolean = false,
+    val sortedListCategories: List<String> = emptyList(),
     val createdAt: Long = System.currentTimeMillis()
 )
+

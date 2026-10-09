@@ -72,6 +72,7 @@ import com.voxmind.app.data.models.ExtractedReminderItem
 import com.voxmind.app.data.models.Priority
 import com.voxmind.app.data.models.Reminder
 import com.voxmind.app.data.models.TranscriptionNote
+import com.voxmind.app.data.repository.SettingsRepository
 import com.voxmind.app.data.repository.VoxMindRepository
 import com.voxmind.app.speech.SpeechManager
 import com.voxmind.app.ui.components.AudioVisualizer
@@ -95,6 +96,7 @@ fun TranscriptionScreen(
     speechManager: SpeechManager,
     deepSeekClient: DeepSeekClient,
     repository: VoxMindRepository,
+    settingsRepo: SettingsRepository,
     alarmScheduler: AlarmScheduler,
     modifier: Modifier = Modifier
 ) {
@@ -322,6 +324,23 @@ fun TranscriptionScreen(
                                 )
                                 repository.saveTranscriptionNote(note)
                                 Toast.makeText(context, "Saved to Notes", Toast.LENGTH_SHORT).show()
+
+                                if (settingsRepo.autoSortEnabled.value) {
+                                    scope.launch {
+                                        repository.autoSortAllWriting(deepSeekClient, forceAll = false).fold(
+                                            onSuccess = { summary ->
+                                                if (summary.totalItemsRouted > 0) {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "✨ DeepSeek auto-sorted ${summary.totalItemsRouted} item(s) into lists: ${summary.listsAffected.joinToString(", ")}",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                }
+                                            },
+                                            onFailure = { /* silent background sorting error */ }
+                                        )
+                                    }
+                                }
                             }
                         },
                         enabled = fullTranscript.isNotBlank(),

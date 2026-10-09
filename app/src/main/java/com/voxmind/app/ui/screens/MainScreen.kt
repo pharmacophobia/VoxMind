@@ -101,6 +101,7 @@ fun MainScreen(
                     speechManager = speechManager,
                     deepSeekClient = deepSeekClient,
                     repository = repository,
+                    settingsRepo = settingsRepo,
                     alarmScheduler = alarmScheduler
                 )
                 1 -> RemindersAlarmsScreen(
@@ -109,7 +110,9 @@ fun MainScreen(
                     alarmScheduler = alarmScheduler
                 )
                 2 -> ListsScreen(
-                    repository = repository
+                    repository = repository,
+                    deepSeekClient = deepSeekClient,
+                    settingsRepo = settingsRepo
                 )
                 3 -> SettingsScreen(
                     settingsRepo = settingsRepo,

@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.voxmind.app.data.models.AutoSortedCategory
 import com.voxmind.app.data.models.ChatMessage
 import com.voxmind.app.data.models.ExtractedReminderItem
 import kotlinx.coroutines.Dispatchers
@@ -140,6 +141,69 @@ class DeepSeekClient(
                 }
             }
             Result.success(items)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun autoSortWritingIntoLists(
+        rawWritings: List<String>,
+        existingListTitles: List<String>
+    ): Result<List<AutoSortedCategory>> = withContext(Dispatchers.IO) {
+        try {
+            if (rawWritings.isEmpty()) return@withContext Result.success(emptyList())
+
+            val combinedWriting = rawWritings.mapIndexed { idx, w -> "--- Note ${idx + 1} ---\n$w" }.joinToString("\n\n")
+            val existingTitlesFormatted = if (existingListTitles.isEmpty()) "None yet" else existingListTitles.joinToString(", ")
+
+            val system = """
+                You are VoxMind's Autonomous Knowledge Classifier and Data Sorter powered by DeepSeek.
+                Your mission is to read through the user's freeform writings, transcriptions, and thought streams, 
+                and intelligently extract and categorize every meaningful task, idea, purchase, note, reminder, or data item into relevant lists.
+                
+                Existing User Lists: [$existingTitlesFormatted]
+                
+                RULES:
+                1. If an extracted item fits naturally into one of the existing lists (e.g. food items -> "Groceries", bug fixes -> "Work Tasks"), route it to that existing list title.
+                2. If it represents a new domain or topic (e.g. "Hardware Projects", "Book & Movie Recommendations", "Fitness Goals", "Key Contacts & Followups"), generate an intuitive, concise new list title.
+                3. Each extracted item should be self-contained, clean, and actionable (remove conversational filler like "um", "I should probably", "remind me to").
+                4. Return strictly a JSON array of objects with the schema:
+                   [
+                     {
+                       "listTitle": "Category Name",
+                       "items": ["Item 1", "Item 2"]
+                     }
+                   ]
+                5. Return ONLY the JSON array without markdown formatting or surrounding explanation.
+            """.trimIndent()
+
+            val raw = executeChatCompletion(system, combinedWriting, modelProvider())
+            val cleanJson = raw.trim()
+                .removePrefix("```json")
+                .removePrefix("```")
+                .removeSuffix("```")
+                .trim()
+
+            val jsonArray = JsonParser.parseString(cleanJson).asJsonArray
+            val categories = mutableListOf<AutoSortedCategory>()
+            for (elem in jsonArray) {
+                if (elem.isJsonObject) {
+                    val obj = elem.asJsonObject
+                    val title = obj.get("listTitle")?.asString?.trim() ?: continue
+                    val itemsArr = obj.getAsJsonArray("items") ?: continue
+                    val items = mutableListOf<String>()
+                    for (it in itemsArr) {
+                        val str = it.asString.trim()
+                        if (str.isNotBlank()) {
+                            items.add(str)
+                        }
+                    }
+                    if (title.isNotBlank() && items.isNotEmpty()) {
+                        categories.add(AutoSortedCategory(listTitle = title, items = items))
+                    }
+                }
+            }
+            Result.success(categories)
         } catch (e: Exception) {
             Result.failure(e)
         }

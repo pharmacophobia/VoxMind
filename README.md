@@ -10,16 +10,24 @@ VoxMind is an open-source, private Android productivity powerhub designed for ha
 
 | Direct 1-Tap Download | Scan QR Code with Phone Camera to Install |
 | :---: | :---: |
-| [![Download APK](https://img.shields.io/badge/Download-VoxMind.apk-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk)<br><br>👉 **[Click here to download VoxMind.apk (10.7 MB)](https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk)**<br><br>📦 Alternate: [Official GitHub Release v1.0.0](https://github.com/pharmacophobia/VoxMind/releases/tag/v1.0.0) | <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk" width="180" height="180" alt="Scan to install VoxMind APK" /><br>*(Point your phone camera to download directly)* |
+| [![Download APK](https://img.shields.io/badge/Download-VoxMind.apk-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk)<br><br>👉 **[Click here to download VoxMind.apk (10.7 MB)](https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk)**<br><br>📦 Alternate: [Official GitHub Release v1.1.0](https://github.com/pharmacophobia/VoxMind/releases/tag/v1.1.0) | <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk" width="180" height="180" alt="Scan to install VoxMind APK" /><br>*(Point your phone camera to download directly)* |
 
 ---
 
 ## ✨ Key Features
 
-### 🎙️ Built-in Speech Transcription Engine
+### 🤖 Autonomous DeepSeek "Overtime" Auto-Organizer
+- **Continuous Categorization**: Over time, as you dictate or write thoughts, DeepSeek analyzes all raw writings and automatically routes data into dedicated, categorized task lists.
+- **Context-Aware List Matching**: Intelligently appends items to existing checklists (e.g., Grocery, Work Tasks, Ideas) without creating duplicates, or auto-spawns vibrant new category lists when fresh topics emerge.
+- **Zero-Friction Background Execution**: Triggers automatically whenever you save a transcription or on-demand via the "✨ Auto-Sort All Writings" button in the Lists tab.
+- **Full Traceability**: Every note tracks its sorting status and lists to which items were filed.
+
+### 🎙️ Clean, Silent Speech Transcription & Noise Elimination
+- **Zero Microphone Beeps & Earcons**: System sound streams (`STREAM_SYSTEM`, `STREAM_NOTIFICATION`, `STREAM_MUSIC`) are muted during continuous listening loops with a 500ms trailing buffer on stop, completely eliminating irritating speech recognition chimes.
+- **Ambient Noise Gate**: Filters out mic hiss, room fan noise, and desk rumble by rejecting audio fluctuations below an RMS threshold (0.12).
+- **Extended Silence Tolerance**: Generous 3.5s–4.0s pause detection ensures you won't get cut off mid-thought.
 - **Live Real-Time Streaming Speech Recognition**: Words appear on screen in real time as you speak.
-- **Dynamic Waveform Visualizer**: Glowing cyber-wave responds to microphone decibels (RMS) in real-time.
-- **Continuous Voice Dictation**: Keeps listening through natural pauses without cutting off your train of thought.
+- **Dynamic Waveform Visualizer**: Glowing cyber-wave responds to microphone decibels (RMS) in real time with a clean flat baseline during silence.
 - **Editable & Shareable**: Edit transcribed text, copy to clipboard in 1 tap, or save to persistent local notes.
 
 ### 🧠 DeepSeek AI Cognitive Superpowers

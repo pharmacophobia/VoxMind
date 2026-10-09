@@ -93,6 +93,7 @@ fun SettingsScreen(
     val continuousSpeech by settingsRepo.continuousSpeech.collectAsState()
     val muteMicSounds by settingsRepo.muteMicSounds.collectAsState()
     val noiseGateEnabled by settingsRepo.noiseGateEnabled.collectAsState()
+    val autoSortEnabled by settingsRepo.autoSortEnabled.collectAsState()
 
     var inputKey by remember(apiKey) { mutableStateOf(apiKey) }
     var inputPhone by remember(defaultPhone) { mutableStateOf(defaultPhone) }
@@ -279,6 +280,33 @@ fun SettingsScreen(
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = AmberWarning,
                             selectedLabelColor = Color.Black
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Autonomous Auto-Sorting
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Autonomous Continuous Auto-Sorting", color = Color.White, fontSize = 14.sp)
+                        Text(
+                            text = "Over time, DeepSeek automatically categorizes and routes all notes into dedicated relevant lists",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    Switch(
+                        checked = autoSortEnabled,
+                        onCheckedChange = { settingsRepo.setAutoSortEnabled(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = IndigoPrimary,
+                            checkedTrackColor = IndigoPrimary.copy(alpha = 0.4f)
                         )
                     )
                 }

@@ -4,7 +4,10 @@ import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.voxmind.app.data.deepseek.DeepSeekClient
 import com.voxmind.app.data.models.AlarmItem
+import com.voxmind.app.data.models.AutoSortSummary
+import com.voxmind.app.data.models.AutoSortedCategory
 import com.voxmind.app.data.models.Checklist
 import com.voxmind.app.data.models.Reminder
 import com.voxmind.app.data.models.TimerItem
@@ -18,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
@@ -318,6 +322,119 @@ class VoxMindRepository(private val context: Context) {
                 val current = _transcriptionNotes.value.filter { it.id != id }
                 _transcriptionNotes.value = current
                 persist(notesFile, current)
+            }
+        }
+    }
+
+    suspend fun autoSortAllWriting(
+        deepSeekClient: DeepSeekClient,
+        forceAll: Boolean = false
+    ): Result<AutoSortSummary> = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            try {
+                val allNotes = _transcriptionNotes.value
+                val notesToSort = if (forceAll) allNotes else allNotes.filter { !it.isAutoSorted }
+                if (notesToSort.isEmpty()) {
+                    return@withLock Result.success(AutoSortSummary(0, emptyList(), 0))
+                }
+
+                val rawTexts = notesToSort.map { note ->
+                    buildString {
+                        append(note.title).append("\n")
+                        if (note.rawTranscript.isNotBlank()) append(note.rawTranscript).append("\n")
+                        if (note.organizedThoughts.isNotBlank()) append(note.organizedThoughts).append("\n")
+                        if (note.bulletPoints.isNotEmpty()) append(note.bulletPoints.joinToString("\n")).append("\n")
+                    }.trim()
+                }.filter { it.isNotBlank() }
+
+                if (rawTexts.isEmpty()) {
+                    return@withLock Result.success(AutoSortSummary(0, emptyList(), 0))
+                }
+
+                val existingLists = _checklists.value
+                val existingTitles = existingLists.map { it.title }
+
+                val result = deepSeekClient.autoSortWritingIntoLists(rawTexts, existingTitles)
+                if (result.isFailure) {
+                    return@withLock Result.failure(result.exceptionOrNull() ?: Exception("Auto-sort failed"))
+                }
+
+                val categories = result.getOrNull() ?: emptyList()
+                if (categories.isEmpty()) {
+                    return@withLock Result.success(AutoSortSummary(0, emptyList(), 0))
+                }
+
+                var totalItemsRouted = 0
+                var newListsCreated = 0
+                val listsAffected = mutableListOf<String>()
+
+                val updatedChecklists = _checklists.value.toMutableList()
+
+                for (category in categories) {
+                    val catTitle = category.listTitle.trim()
+                    val existingIndex = updatedChecklists.indexOfFirst { it.title.equals(catTitle, ignoreCase = true) }
+
+                    if (existingIndex != -1) {
+                        val targetList = updatedChecklists[existingIndex]
+                        val existingItemTexts = targetList.items.map { it.text.lowercase().trim() }.toSet()
+                        val newItemsToAdd = category.items
+                            .map { it.trim() }
+                            .filter { it.isNotBlank() && !existingItemTexts.contains(it.lowercase()) }
+                            .map { TodoItem(text = it) }
+
+                        if (newItemsToAdd.isNotEmpty()) {
+                            totalItemsRouted += newItemsToAdd.size
+                            listsAffected.add(targetList.title)
+                            updatedChecklists[existingIndex] = targetList.copy(
+                                items = targetList.items + newItemsToAdd,
+                                updatedAt = System.currentTimeMillis()
+                            )
+                        }
+                    } else {
+                        // Create new categorized list with distinctive color
+                        val newItems = category.items
+                            .map { it.trim() }
+                            .filter { it.isNotBlank() }
+                            .map { TodoItem(text = it) }
+
+                        if (newItems.isNotEmpty()) {
+                            val palette = listOf("#6366F1", "#10B981", "#F59E0B", "#06B6D4", "#A855F7", "#EC4899", "#3B82F6")
+                            val chosenColor = palette[Math.abs(catTitle.hashCode()) % palette.size]
+                            val newList = Checklist(
+                                title = catTitle,
+                                items = newItems,
+                                colorHex = chosenColor
+                            )
+                            updatedChecklists.add(0, newList)
+                            totalItemsRouted += newItems.size
+                            newListsCreated++
+                            listsAffected.add(catTitle)
+                        }
+                    }
+                }
+
+                _checklists.value = updatedChecklists
+                persist(checklistsFile, updatedChecklists)
+
+                // Mark processed notes as sorted
+                val sortedNoteIds = notesToSort.map { it.id }.toSet()
+                val updatedNotes = _transcriptionNotes.value.map { note ->
+                    if (sortedNoteIds.contains(note.id)) {
+                        note.copy(isAutoSorted = true, sortedListCategories = categories.map { it.listTitle })
+                    } else note
+                }
+                _transcriptionNotes.value = updatedNotes
+                persist(notesFile, updatedNotes)
+
+                Result.success(
+                    AutoSortSummary(
+                        totalItemsRouted = totalItemsRouted,
+                        listsAffected = listsAffected.distinct(),
+                        newListsCreated = newListsCreated
+                    )
+                )
+            } catch (e: Exception) {
+                Result.failure(e)
             }
         }
     }
