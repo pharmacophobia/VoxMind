@@ -94,6 +94,9 @@ fun SettingsScreen(
     val muteMicSounds by settingsRepo.muteMicSounds.collectAsState()
     val noiseGateEnabled by settingsRepo.noiseGateEnabled.collectAsState()
     val autoSortEnabled by settingsRepo.autoSortEnabled.collectAsState()
+    val autoScheduleReminders by settingsRepo.autoScheduleReminders.collectAsState()
+    val defaultSmsEnabled by settingsRepo.defaultSmsEnabled.collectAsState()
+    val defaultEmailEnabled by settingsRepo.defaultEmailEnabled.collectAsState()
 
     var inputKey by remember(apiKey) { mutableStateOf(apiKey) }
     var inputPhone by remember(defaultPhone) { mutableStateOf(defaultPhone) }
@@ -310,6 +313,33 @@ fun SettingsScreen(
                         )
                     )
                 }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Autonomous Reminders Scheduling
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Autonomous Text & Email Reminders", color = Color.White, fontSize = 14.sp)
+                        Text(
+                            text = "DeepSeek automatically scans notes, detects dates/times, and schedules exact alarms with SMS/Email alerts",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    Switch(
+                        checked = autoScheduleReminders,
+                        onCheckedChange = { settingsRepo.setAutoScheduleReminders(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = AmberWarning,
+                            checkedTrackColor = AmberWarning.copy(alpha = 0.4f)
+                        )
+                    )
+                }
             }
         }
 
@@ -404,6 +434,46 @@ fun SettingsScreen(
                         unfocusedBorderColor = Color.DarkGray
                     )
                 )
+
+                // Default SMS toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Default Auto-SMS on Reminders", color = Color.White, fontSize = 13.sp)
+                        Text("Automatically arm text message dispatch for all scheduled reminders", color = Color.Gray, fontSize = 11.sp)
+                    }
+                    Switch(
+                        checked = defaultSmsEnabled,
+                        onCheckedChange = { settingsRepo.setDefaultSmsEnabled(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = EmeraldSuccess,
+                            checkedTrackColor = EmeraldSuccess.copy(alpha = 0.4f)
+                        )
+                    )
+                }
+
+                // Default Email toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Default Auto-Email on Reminders", color = Color.White, fontSize = 13.sp)
+                        Text("Automatically arm email action for all scheduled reminders", color = Color.Gray, fontSize = 11.sp)
+                    }
+                    Switch(
+                        checked = defaultEmailEnabled,
+                        onCheckedChange = { settingsRepo.setDefaultEmailEnabled(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = IndigoPrimary,
+                            checkedTrackColor = IndigoPrimary.copy(alpha = 0.4f)
+                        )
+                    )
+                }
             }
         }
 

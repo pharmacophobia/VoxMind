@@ -10,11 +10,18 @@ VoxMind is an open-source, private Android productivity powerhub designed for ha
 
 | Direct 1-Tap Download | Scan QR Code with Phone Camera to Install |
 | :---: | :---: |
-| [![Download APK](https://img.shields.io/badge/Download-VoxMind.apk-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk)<br><br>👉 **[Click here to download VoxMind.apk (10.7 MB)](https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk)**<br><br>📦 Alternate: [Official GitHub Release v1.1.0](https://github.com/pharmacophobia/VoxMind/releases/tag/v1.1.0) | <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk" width="180" height="180" alt="Scan to install VoxMind APK" /><br>*(Point your phone camera to download directly)* |
+| [![Download APK](https://img.shields.io/badge/Download-VoxMind.apk-6366F1?style=for-the-badge&logo=android&logoColor=white)](https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk)<br><br>👉 **[Click here to download VoxMind.apk (11.0 MB)](https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk)**<br><br>📦 Alternate: [Official GitHub Release v1.2.0](https://github.com/pharmacophobia/VoxMind/releases/tag/v1.2.0) | <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://github.com/pharmacophobia/VoxMind/raw/main/VoxMind.apk" width="180" height="180" alt="Scan to install VoxMind APK" /><br>*(Point your phone camera to download directly)* |
 
 ---
 
 ## ✨ Key Features
+
+### ⚡ Autonomous DeepSeek Text & Email Reminders Engine
+- **Automatic Multi-Channel Scheduling**: DeepSeek analyzes voice dictations and written thoughts in real-time or over time, detects dates, relative times (*"in 30 minutes"*, *"tomorrow at 9 AM"*, *"Friday 5 PM"*), and schedules exact Android alarms automatically.
+- **Intelligent Text Message (SMS) Dispatch**: Detects texting intentions and contacts (e.g. *"text mom at 555-1234"* or *"send text reminder"*). Automatically routes and dispatches background SMS when the alarm triggers.
+- **Automatic Email Integration**: Detects email instructions and addresses (e.g. *"email team@work.com about the report"*). Wires a high-priority 1-tap **"✉️ Send Email"** action on the notification shade and pre-fills email drafts ready to send.
+- **Natural Language Quick-Scheduler**: Type or dictate natural language reminder instructions directly in the Reminders tab (e.g. *"Text reminder to 555-0199 tomorrow at 3 PM to pick up groceries"*) for 1-tap instant AI arming.
+- **Overtime Automatic Background Scheduling**: Every voice note saved can automatically detect commitments and arm alarms without manual entry.
 
 ### 🤖 Autonomous DeepSeek "Overtime" Auto-Organizer
 - **Continuous Categorization**: Over time, as you dictate or write thoughts, DeepSeek analyzes all raw writings and automatically routes data into dedicated, categorized task lists.

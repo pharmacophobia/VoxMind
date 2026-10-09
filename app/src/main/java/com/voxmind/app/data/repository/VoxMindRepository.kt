@@ -6,13 +6,17 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.voxmind.app.data.deepseek.DeepSeekClient
 import com.voxmind.app.data.models.AlarmItem
+import com.voxmind.app.data.models.AutoScheduleSummary
 import com.voxmind.app.data.models.AutoSortSummary
 import com.voxmind.app.data.models.AutoSortedCategory
 import com.voxmind.app.data.models.Checklist
+import com.voxmind.app.data.models.ExtractedReminderItem
+import com.voxmind.app.data.models.Priority
 import com.voxmind.app.data.models.Reminder
 import com.voxmind.app.data.models.TimerItem
 import com.voxmind.app.data.models.TodoItem
 import com.voxmind.app.data.models.TranscriptionNote
+import com.voxmind.app.util.AlarmScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +27,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.Calendar
 import java.util.UUID
 
 class VoxMindRepository(private val context: Context) {
@@ -436,6 +441,125 @@ class VoxMindRepository(private val context: Context) {
             } catch (e: Exception) {
                 Result.failure(e)
             }
+        }
+    }
+
+    fun computeReminderDueTimestamp(item: ExtractedReminderItem): Long {
+        val now = System.currentTimeMillis()
+        if (item.targetEpochMillis != null && item.targetEpochMillis > now) {
+            return item.targetEpochMillis
+        }
+        if (item.delayMinutes != null && item.delayMinutes > 0) {
+            return now + (item.delayMinutes * 60 * 1000L)
+        }
+        val text = item.detectedDateOrTime.lowercase()
+        return when {
+            text.contains("10 min") || text.contains("10m") -> now + (10 * 60 * 1000L)
+            text.contains("15 min") || text.contains("15m") -> now + (15 * 60 * 1000L)
+            text.contains("20 min") || text.contains("20m") -> now + (20 * 60 * 1000L)
+            text.contains("30 min") || text.contains("30m") || text.contains("half hour") -> now + (30 * 60 * 1000L)
+            text.contains("45 min") || text.contains("45m") -> now + (45 * 60 * 1000L)
+            text.contains("1 hour") || text.contains("one hour") || text.contains("an hour") -> now + (60 * 60 * 1000L)
+            text.contains("2 hour") || text.contains("two hour") -> now + (2 * 60 * 60 * 1000L)
+            text.contains("3 hour") || text.contains("three hour") -> now + (3 * 60 * 60 * 1000L)
+            text.contains("tomorrow") -> now + (24 * 60 * 60 * 1000L)
+            text.contains("tonight") -> {
+                val cal = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 20)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                }
+                if (cal.timeInMillis <= now) cal.add(Calendar.DAY_OF_YEAR, 1)
+                cal.timeInMillis
+            }
+            else -> now + (60 * 60 * 1000L) // Default 1 hour
+        }
+    }
+
+    suspend fun autoExtractAndScheduleReminders(
+        deepSeekClient: DeepSeekClient,
+        alarmScheduler: AlarmScheduler,
+        defaultPhone: String,
+        defaultEmail: String,
+        defaultSmsEnabled: Boolean,
+        defaultEmailEnabled: Boolean,
+        rawText: String
+    ): Result<AutoScheduleSummary> = withContext(Dispatchers.IO) {
+        try {
+            if (rawText.isBlank()) return@withContext Result.success(AutoScheduleSummary(0, 0, 0, emptyList()))
+
+            val extractResult = deepSeekClient.extractReminders(rawText)
+            if (extractResult.isFailure) {
+                return@withContext Result.failure(extractResult.exceptionOrNull() ?: Exception("Failed to extract reminders"))
+            }
+
+            val items = extractResult.getOrNull() ?: emptyList()
+            if (items.isEmpty()) {
+                return@withContext Result.success(AutoScheduleSummary(0, 0, 0, emptyList()))
+            }
+
+            var smsCount = 0
+            var emailCount = 0
+            val createdTitles = mutableListOf<String>()
+
+            mutex.withLock {
+                val currentReminders = _reminders.value.toMutableList()
+
+                for (item in items) {
+                    val due = computeReminderDueTimestamp(item)
+
+                    // Determine SMS dispatch
+                    val shouldSms = item.sendSms || defaultSmsEnabled ||
+                        (item.smsRecipientPhone.isNotBlank()) ||
+                        (defaultPhone.isNotBlank() && (rawText.contains("text", ignoreCase = true) || rawText.contains("sms", ignoreCase = true)))
+                    val smsPhone = item.smsRecipientPhone.ifBlank { defaultPhone }
+
+                    // Determine Email dispatch
+                    val shouldEmail = item.sendEmail || defaultEmailEnabled ||
+                        (item.emailRecipient.isNotBlank()) ||
+                        (defaultEmail.isNotBlank() && (rawText.contains("email", ignoreCase = true) || rawText.contains("mail", ignoreCase = true)))
+                    val emailTarget = item.emailRecipient.ifBlank { defaultEmail }
+
+                    // Prevent duplicate creation for identical title within 5 minutes
+                    val isDuplicate = currentReminders.any {
+                        it.title.equals(item.taskTitle, ignoreCase = true) && Math.abs(it.dueTimestamp - due) < 300_000L
+                    }
+
+                    if (!isDuplicate) {
+                        val reminder = Reminder(
+                            title = item.taskTitle,
+                            notes = if (item.notes.isNotBlank()) "${item.notes} • When: ${item.detectedDateOrTime}" else "Detected: ${item.detectedDateOrTime}",
+                            dueTimestamp = due,
+                            priority = Priority.HIGH,
+                            sendSms = shouldSms && smsPhone.isNotBlank(),
+                            smsRecipientPhone = if (shouldSms) smsPhone else "",
+                            sendEmail = shouldEmail && emailTarget.isNotBlank(),
+                            emailRecipient = if (shouldEmail) emailTarget else ""
+                        )
+
+                        if (reminder.sendSms && reminder.smsRecipientPhone.isNotBlank()) smsCount++
+                        if (reminder.sendEmail && reminder.emailRecipient.isNotBlank()) emailCount++
+
+                        currentReminders.add(0, reminder)
+                        createdTitles.add(reminder.title)
+                        alarmScheduler.scheduleReminder(reminder)
+                    }
+                }
+
+                _reminders.value = currentReminders
+                persist(remindersFile, currentReminders)
+            }
+
+            Result.success(
+                AutoScheduleSummary(
+                    remindersCreated = createdTitles.size,
+                    smsEnabledCount = smsCount,
+                    emailEnabledCount = emailCount,
+                    titles = createdTitles
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

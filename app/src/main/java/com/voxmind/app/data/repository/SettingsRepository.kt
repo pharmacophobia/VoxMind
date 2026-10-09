@@ -19,6 +19,7 @@ class SettingsRepository(context: Context) {
         private const val KEY_MUTE_MIC_SOUNDS = "mute_mic_sounds"
         private const val KEY_NOISE_GATE = "noise_gate_enabled"
         private const val KEY_AUTO_SORT_ENABLED = "auto_sort_enabled"
+        private const val KEY_AUTO_SCHEDULE_REMINDERS = "auto_schedule_reminders"
         private const val KEY_DEFAULT_SMS_ENABLED = "default_sms_enabled"
         private const val KEY_DEFAULT_EMAIL_ENABLED = "default_email_enabled"
 
@@ -51,6 +52,9 @@ class SettingsRepository(context: Context) {
 
     private val _autoSortEnabled = MutableStateFlow(prefs.getBoolean(KEY_AUTO_SORT_ENABLED, true))
     val autoSortEnabled: StateFlow<Boolean> = _autoSortEnabled.asStateFlow()
+
+    private val _autoScheduleReminders = MutableStateFlow(prefs.getBoolean(KEY_AUTO_SCHEDULE_REMINDERS, true))
+    val autoScheduleReminders: StateFlow<Boolean> = _autoScheduleReminders.asStateFlow()
 
     private val _defaultSmsEnabled = MutableStateFlow(prefs.getBoolean(KEY_DEFAULT_SMS_ENABLED, false))
     val defaultSmsEnabled: StateFlow<Boolean> = _defaultSmsEnabled.asStateFlow()
@@ -97,6 +101,11 @@ class SettingsRepository(context: Context) {
     fun setAutoSortEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_AUTO_SORT_ENABLED, enabled).apply()
         _autoSortEnabled.value = enabled
+    }
+
+    fun setAutoScheduleReminders(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_AUTO_SCHEDULE_REMINDERS, enabled).apply()
+        _autoScheduleReminders.value = enabled
     }
 
     fun setDefaultSmsEnabled(enabled: Boolean) {

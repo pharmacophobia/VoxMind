@@ -72,9 +72,9 @@ fun DeepSeekActionButtons(
             onClick = onSummarize
         )
 
-        // 4. Extract Reminders
+        // 4. Auto-Set Reminders
         ActionButton(
-            text = "⏰ Extract Reminders",
+            text = "⚡ Auto-Set Reminders (SMS/Email)",
             tint = AmberWarning,
             isLoading = isLoading && currentAction == "extract",
             enabled = enabled && !isLoading,

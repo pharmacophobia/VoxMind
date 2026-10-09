@@ -106,6 +106,7 @@ fun MainScreen(
                 )
                 1 -> RemindersAlarmsScreen(
                     repository = repository,
+                    deepSeekClient = deepSeekClient,
                     settingsRepo = settingsRepo,
                     alarmScheduler = alarmScheduler
                 )

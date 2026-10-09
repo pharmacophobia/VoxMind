@@ -58,6 +58,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import com.voxmind.app.data.deepseek.DeepSeekClient
 import com.voxmind.app.data.models.AlarmItem
 import com.voxmind.app.data.models.Priority
 import com.voxmind.app.data.models.Reminder
@@ -88,6 +93,7 @@ import java.util.Locale
 @Composable
 fun RemindersAlarmsScreen(
     repository: VoxMindRepository,
+    deepSeekClient: DeepSeekClient,
     settingsRepo: SettingsRepository,
     alarmScheduler: AlarmScheduler,
     modifier: Modifier = Modifier
@@ -107,6 +113,9 @@ fun RemindersAlarmsScreen(
     var showCreateReminderDialog by remember { mutableStateOf(false) }
     var showCreateAlarmDialog by remember { mutableStateOf(false) }
     var showCreateTimerDialog by remember { mutableStateOf(false) }
+
+    var aiReminderPrompt by remember { mutableStateOf("") }
+    var isSchedulingAiReminder by remember { mutableStateOf(false) }
 
     // Live timer ticker for active running timers
     LaunchedEffect(timers) {
@@ -203,17 +212,112 @@ fun RemindersAlarmsScreen(
 
             when (selectedTab) {
                 0 -> { // Reminders
-                    if (reminders.isEmpty()) {
-                        EmptyStateView(
-                            icon = Icons.Default.Notifications,
-                            title = "No Scheduled Reminders",
-                            subtitle = "Tap + or dictate in the Transcribe tab to add voice reminders"
-                        )
-                    } else {
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.fillMaxSize()
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = Slate900),
+                            shape = RoundedCornerShape(12.dp)
                         ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = null,
+                                        tint = AmberWarning,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Text(
+                                        text = "⚡ DeepSeek Auto-Scheduler",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = AmberWarning
+                                    )
+                                }
+                                Text(
+                                    text = "Auto-detect dates, times, SMS phone numbers and emails to schedule exact alarms.",
+                                    fontSize = 11.sp,
+                                    color = Color.LightGray
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    OutlinedTextField(
+                                        value = aiReminderPrompt,
+                                        onValueChange = { aiReminderPrompt = it },
+                                        placeholder = { Text("e.g. Text mom tomorrow at 10 AM...", fontSize = 12.sp, color = Color.Gray) },
+                                        singleLine = true,
+                                        modifier = Modifier.weight(1f),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedTextColor = Color.White,
+                                            unfocusedTextColor = Color.White,
+                                            focusedBorderColor = AmberWarning,
+                                            unfocusedBorderColor = Color.DarkGray
+                                        )
+                                    )
+                                    Button(
+                                        onClick = {
+                                            if (aiReminderPrompt.isNotBlank()) {
+                                                scope.launch {
+                                                    isSchedulingAiReminder = true
+                                                    repository.autoExtractAndScheduleReminders(
+                                                        deepSeekClient = deepSeekClient,
+                                                        alarmScheduler = alarmScheduler,
+                                                        defaultPhone = defaultPhone,
+                                                        defaultEmail = defaultEmail,
+                                                        defaultSmsEnabled = settingsRepo.defaultSmsEnabled.value,
+                                                        defaultEmailEnabled = settingsRepo.defaultEmailEnabled.value,
+                                                        rawText = aiReminderPrompt
+                                                    ).fold(
+                                                        onSuccess = { summary ->
+                                                            if (summary.remindersCreated > 0) {
+                                                                val smsInfo = if (summary.smsEnabledCount > 0) " (${summary.smsEnabledCount} SMS)" else ""
+                                                                val emailInfo = if (summary.emailEnabledCount > 0) " (${summary.emailEnabledCount} Email)" else ""
+                                                                Toast.makeText(context, "⚡ Auto-scheduled ${summary.remindersCreated} reminder(s)$smsInfo$emailInfo!", Toast.LENGTH_LONG).show()
+                                                                aiReminderPrompt = ""
+                                                            } else {
+                                                                Toast.makeText(context, "No reminder detected in prompt", Toast.LENGTH_SHORT).show()
+                                                            }
+                                                        },
+                                                        onFailure = { Toast.makeText(context, "Error: ${it.localizedMessage}", Toast.LENGTH_SHORT).show() }
+                                                    )
+                                                    isSchedulingAiReminder = false
+                                                }
+                                            }
+                                        },
+                                        enabled = aiReminderPrompt.isNotBlank() && !isSchedulingAiReminder,
+                                        colors = ButtonDefaults.buttonColors(containerColor = AmberWarning)
+                                    ) {
+                                        if (isSchedulingAiReminder) {
+                                            CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.Black, strokeWidth = 2.dp)
+                                        } else {
+                                            Text("Auto-Set", color = Color.Black, fontSize = 12.sp)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (reminders.isEmpty()) {
+                            EmptyStateView(
+                                icon = Icons.Default.Notifications,
+                                title = "No Scheduled Reminders",
+                                subtitle = "Type above or dictate in Transcribe to auto-set voice reminders"
+                            )
+                        } else {
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.fillMaxSize()
+                            ) {
                             items(reminders, key = { it.id }) { reminder ->
                                 ReminderCard(
                                     reminder = reminder,
@@ -247,8 +351,9 @@ fun RemindersAlarmsScreen(
                         }
                     }
                 }
+            }
 
-                1 -> { // Alarms
+            1 -> { // Alarms
                     if (alarms.isEmpty()) {
                         EmptyStateView(
                             icon = Icons.Default.Alarm,

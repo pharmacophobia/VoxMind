@@ -7,7 +7,20 @@ data class ExtractedReminderItem(
     val taskTitle: String,
     val detectedDateOrTime: String,
     val notes: String = "",
+    val delayMinutes: Long? = null,
+    val targetEpochMillis: Long? = null,
+    val sendSms: Boolean = false,
+    val smsRecipientPhone: String = "",
+    val sendEmail: Boolean = false,
+    val emailRecipient: String = "",
     val isScheduled: Boolean = false
+)
+
+data class AutoScheduleSummary(
+    val remindersCreated: Int,
+    val smsEnabledCount: Int,
+    val emailEnabledCount: Int,
+    val titles: List<String>
 )
 
 data class AutoSortedCategory(

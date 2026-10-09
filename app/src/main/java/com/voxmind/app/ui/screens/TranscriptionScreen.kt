@@ -341,6 +341,33 @@ fun TranscriptionScreen(
                                         )
                                     }
                                 }
+
+                                if (settingsRepo.autoScheduleReminders.value) {
+                                    scope.launch {
+                                        repository.autoExtractAndScheduleReminders(
+                                            deepSeekClient = deepSeekClient,
+                                            alarmScheduler = alarmScheduler,
+                                            defaultPhone = settingsRepo.defaultPhone.value,
+                                            defaultEmail = settingsRepo.defaultEmail.value,
+                                            defaultSmsEnabled = settingsRepo.defaultSmsEnabled.value,
+                                            defaultEmailEnabled = settingsRepo.defaultEmailEnabled.value,
+                                            rawText = fullTranscript
+                                        ).fold(
+                                            onSuccess = { summary ->
+                                                if (summary.remindersCreated > 0) {
+                                                    val smsText = if (summary.smsEnabledCount > 0) " (${summary.smsEnabledCount} with SMS)" else ""
+                                                    val emailText = if (summary.emailEnabledCount > 0) " (${summary.emailEnabledCount} with Email)" else ""
+                                                    Toast.makeText(
+                                                        context,
+                                                        "⏰ DeepSeek auto-scheduled ${summary.remindersCreated} reminder(s)$smsText$emailText!",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                }
+                                            },
+                                            onFailure = { /* silent background reminder error */ }
+                                        )
+                                    }
+                                }
                             }
                         },
                         enabled = fullTranscript.isNotBlank(),
@@ -434,10 +461,31 @@ fun TranscriptionScreen(
                     isAiLoading = true
                     currentAiAction = "extract"
                     deepSeekClient.extractReminders(fullTranscript).fold(
-                        onSuccess = {
-                            extractedReminders = it
+                        onSuccess = { items ->
+                            extractedReminders = items
                             activeTab = 3
-                            Toast.makeText(context, "Found ${it.size} reminder(s)!", Toast.LENGTH_SHORT).show()
+
+                            // Automatically schedule them with SMS and Email if enabled or detected
+                            repository.autoExtractAndScheduleReminders(
+                                deepSeekClient = deepSeekClient,
+                                alarmScheduler = alarmScheduler,
+                                defaultPhone = settingsRepo.defaultPhone.value,
+                                defaultEmail = settingsRepo.defaultEmail.value,
+                                defaultSmsEnabled = settingsRepo.defaultSmsEnabled.value,
+                                defaultEmailEnabled = settingsRepo.defaultEmailEnabled.value,
+                                rawText = fullTranscript
+                            ).fold(
+                                onSuccess = { summary ->
+                                    val smsInfo = if (summary.smsEnabledCount > 0) " (${summary.smsEnabledCount} SMS)" else ""
+                                    val emailInfo = if (summary.emailEnabledCount > 0) " (${summary.emailEnabledCount} Email)" else ""
+                                    Toast.makeText(
+                                        context,
+                                        "⚡ Auto-scheduled ${summary.remindersCreated} reminder(s)$smsInfo$emailInfo!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                },
+                                onFailure = { /* already notified */ }
+                            )
                         },
                         onFailure = {
                             Toast.makeText(context, "AI error: ${it.localizedMessage}", Toast.LENGTH_LONG).show()
@@ -568,22 +616,65 @@ fun TranscriptionScreen(
                     3 -> { // Extracted Reminders
                         if (extractedReminders.isEmpty()) {
                             Text(
-                                text = "Tap '⏰ Extract Reminders' to detect dates, times, and alarms from speech.",
+                                text = "Tap '⚡ Auto-Set Reminders' to automatically detect dates, times, SMS and email alerts.",
                                 color = Color.Gray,
                                 fontSize = 13.sp
                             )
                         } else {
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "⚡ Auto-Scheduled Reminders",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = AmberWarning
+                                    )
+                                    FilledTonalButton(
+                                        onClick = {
+                                            scope.launch {
+                                                repository.autoExtractAndScheduleReminders(
+                                                    deepSeekClient = deepSeekClient,
+                                                    alarmScheduler = alarmScheduler,
+                                                    defaultPhone = settingsRepo.defaultPhone.value,
+                                                    defaultEmail = settingsRepo.defaultEmail.value,
+                                                    defaultSmsEnabled = settingsRepo.defaultSmsEnabled.value,
+                                                    defaultEmailEnabled = settingsRepo.defaultEmailEnabled.value,
+                                                    rawText = fullTranscript
+                                                ).fold(
+                                                    onSuccess = { summary ->
+                                                        Toast.makeText(context, "Re-armed ${summary.remindersCreated} reminder(s)!", Toast.LENGTH_SHORT).show()
+                                                    },
+                                                    onFailure = { Toast.makeText(context, "Error: ${it.localizedMessage}", Toast.LENGTH_SHORT).show() }
+                                                )
+                                            }
+                                        },
+                                        colors = ButtonDefaults.filledTonalButtonColors(
+                                            containerColor = AmberWarning.copy(alpha = 0.2f),
+                                            contentColor = AmberWarning
+                                        )
+                                    ) {
+                                        Text("⚡ Re-Arm All", fontSize = 11.sp)
+                                    }
+                                }
+
                                 extractedReminders.forEach { item ->
+                                    val effectiveSms = item.sendSms || (settingsRepo.defaultSmsEnabled.value && settingsRepo.defaultPhone.value.isNotBlank())
+                                    val effectivePhone = item.smsRecipientPhone.ifBlank { settingsRepo.defaultPhone.value }
+                                    val effectiveEmail = item.sendEmail || (settingsRepo.defaultEmailEnabled.value && settingsRepo.defaultEmail.value.isNotBlank())
+                                    val effectiveEmailAddr = item.emailRecipient.ifBlank { settingsRepo.defaultEmail.value }
+
                                     Card(
                                         colors = CardDefaults.cardColors(containerColor = Slate800),
-                                        shape = RoundedCornerShape(8.dp),
+                                        shape = RoundedCornerShape(10.dp),
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(10.dp),
+                                                .padding(12.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
@@ -605,28 +696,62 @@ fun TranscriptionScreen(
                                                         fontSize = 11.sp
                                                     )
                                                 }
+
+                                                Spacer(modifier = Modifier.height(6.dp))
+
+                                                // SMS & Email Indicator Badges
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    if (effectiveSms && effectivePhone.isNotBlank()) {
+                                                        Text(
+                                                            text = "💬 SMS: $effectivePhone",
+                                                            color = Color(0xFF38BDF8),
+                                                            fontSize = 10.sp,
+                                                            modifier = Modifier
+                                                                .background(Color(0xFF0284C7).copy(alpha = 0.2f), RoundedCornerShape(4.dp))
+                                                                .padding(horizontal = 5.dp, vertical = 2.dp)
+                                                        )
+                                                    }
+                                                    if (effectiveEmail && effectiveEmailAddr.isNotBlank()) {
+                                                        Text(
+                                                            text = "✉️ Email: $effectiveEmailAddr",
+                                                            color = Color(0xFFA78BFA),
+                                                            fontSize = 10.sp,
+                                                            modifier = Modifier
+                                                                .background(Color(0xFF7C3AED).copy(alpha = 0.2f), RoundedCornerShape(4.dp))
+                                                                .padding(horizontal = 5.dp, vertical = 2.dp)
+                                                        )
+                                                    }
+                                                }
                                             }
+
+                                            Spacer(modifier = Modifier.width(8.dp))
 
                                             FilledTonalButton(
                                                 onClick = {
-                                                    // Schedule reminder in 1 hour by default if relative, or at due timestamp
-                                                    val due = System.currentTimeMillis() + (60 * 60 * 1000L)
+                                                    val due = repository.computeReminderDueTimestamp(item)
                                                     val reminder = Reminder(
                                                         title = item.taskTitle,
                                                         notes = "Spoken note: ${item.notes} (${item.detectedDateOrTime})",
                                                         dueTimestamp = due,
-                                                        priority = Priority.HIGH
+                                                        priority = Priority.HIGH,
+                                                        sendSms = effectiveSms && effectivePhone.isNotBlank(),
+                                                        smsRecipientPhone = effectivePhone,
+                                                        sendEmail = effectiveEmail && effectiveEmailAddr.isNotBlank(),
+                                                        emailRecipient = effectiveEmailAddr
                                                     )
                                                     repository.saveReminder(reminder)
                                                     alarmScheduler.scheduleReminder(reminder)
-                                                    Toast.makeText(context, "Scheduled reminder for '${item.taskTitle}'!", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(context, "Armed reminder for '${item.taskTitle}'!", Toast.LENGTH_SHORT).show()
                                                 },
                                                 colors = ButtonDefaults.filledTonalButtonColors(
-                                                    containerColor = AmberWarning.copy(alpha = 0.2f),
-                                                    contentColor = AmberWarning
+                                                    containerColor = EmeraldSuccess.copy(alpha = 0.2f),
+                                                    contentColor = EmeraldSuccess
                                                 )
                                             ) {
-                                                Text("Add Reminder", fontSize = 12.sp)
+                                                Text("Arm / Set", fontSize = 11.sp)
                                             }
                                         }
                                     }

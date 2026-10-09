@@ -15,6 +15,7 @@ import com.voxmind.app.data.models.AlarmItem
 import com.voxmind.app.data.models.Reminder
 import com.voxmind.app.data.models.TimerItem
 import com.voxmind.app.receiver.AlarmReceiver
+import com.voxmind.app.util.EmailHelper
 
 class NotificationHelper(private val context: Context) {
 
@@ -149,6 +150,21 @@ class NotificationHelper(private val context: Context) {
             .setContentIntent(openPendingIntent)
             .addAction(android.R.drawable.checkbox_on_background, "Done", donePendingIntent)
             .addAction(android.R.drawable.ic_menu_recent_history, "Snooze 10m", snoozePendingIntent)
+
+        if (reminder.sendEmail && reminder.emailRecipient.isNotBlank()) {
+            val emailIntent = EmailHelper.createEmailIntent(
+                reminder.emailRecipient,
+                "⏰ [VoxMind Reminder] ${reminder.title}",
+                if (reminder.notes.isNotBlank()) "${reminder.title}\n\n${reminder.notes}" else reminder.title
+            )
+            val emailPendingIntent = PendingIntent.getActivity(
+                context,
+                reminder.id.hashCode() + 3,
+                emailIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.addAction(android.R.drawable.ic_dialog_email, "Send Email", emailPendingIntent)
+        }
 
         notificationManager.notify(reminder.id.hashCode(), builder.build())
     }

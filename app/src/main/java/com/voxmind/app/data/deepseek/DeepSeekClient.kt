@@ -14,6 +14,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class DeepSeekClient(
@@ -109,18 +112,48 @@ class DeepSeekClient(
         }
     }
 
-    suspend fun extractReminders(transcript: String): Result<List<ExtractedReminderItem>> = withContext(Dispatchers.IO) {
+    suspend fun extractReminders(
+        transcript: String,
+        currentTimeContext: String = ""
+    ): Result<List<ExtractedReminderItem>> = withContext(Dispatchers.IO) {
         try {
+            val nowContext = currentTimeContext.ifBlank {
+                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm (EEEE)", Locale.getDefault())
+                sdf.format(Date())
+            }
+
             val system = """
-                You are VoxMind AI. Analyze the spoken transcript and detect all reminders, deadlines, alarms, timers, or scheduled tasks mentioned.
-                Format your response strictly as a JSON array of objects with keys:
-                "taskTitle": string (e.g. "Doctor Appointment")
-                "detectedDateOrTime": string (e.g. "Tomorrow at 2:00 PM" or "in 20 minutes")
-                "notes": string (additional context or details)
+                You are VoxMind AI, an autonomous scheduling agent powered by DeepSeek.
+                Analyze the spoken transcript or written note and detect ALL reminders, deadlines, alarms, commitments, or scheduled tasks mentioned.
+                Current Reference Time: $nowContext
                 
-                Return ONLY the JSON array without markdown backticks or commentary. Example:
-                [{"taskTitle": "Call Sarah", "detectedDateOrTime": "Today at 5 PM", "notes": "Discuss project launch"}]
-                If none found, return [].
+                For EACH detected item, extract:
+                1. "taskTitle": string — concise, actionable title (e.g. "Doctor Appointment", "Call Sarah", "Submit Taxes").
+                2. "detectedDateOrTime": string — natural language time description (e.g. "Tomorrow at 2:00 PM", "in 30 minutes", "Friday 5 PM").
+                3. "delayMinutes": integer — minutes from right now until the reminder should trigger.
+                   - Compute based on Current Reference Time: $nowContext.
+                   - "in 20 minutes" -> 20; "in 2 hours" -> 120; "tomorrow at this same time" -> 1440; "tonight at 8pm" -> calculate minutes between now and 8pm.
+                   - If exact time cannot be determined, default to 60.
+                4. "notes": string — context, details, or reasons mentioned in speech.
+                5. "sendSms": boolean — set to true if the user mentions texting/SMS (e.g. "text me", "send text", "SMS mom", "text 555-1234"), OR if a phone number is detected.
+                6. "smsRecipientPhone": string — phone number if mentioned, or "" if meant for default/self.
+                7. "sendEmail": boolean — set to true if the user mentions emailing (e.g. "email me", "send email reminder", "email user@example.com"), OR if an email address is detected.
+                8. "emailRecipient": string — email address if mentioned, or "" if meant for default/self.
+
+                Return strictly a JSON array of objects with the schema:
+                [
+                  {
+                    "taskTitle": "Call Sarah",
+                    "detectedDateOrTime": "Today at 5:00 PM",
+                    "delayMinutes": 120,
+                    "notes": "Discuss project launch",
+                    "sendSms": true,
+                    "smsRecipientPhone": "555-0199",
+                    "sendEmail": false,
+                    "emailRecipient": ""
+                  }
+                ]
+                Return ONLY the JSON array without markdown backticks or commentary. If none found, return [].
             """.trimIndent()
             val raw = executeChatCompletion(system, transcript, modelProvider())
             val cleanJson = raw.trim()
@@ -137,7 +170,26 @@ class DeepSeekClient(
                     val title = obj.get("taskTitle")?.asString ?: "Reminder"
                     val time = obj.get("detectedDateOrTime")?.asString ?: "Later"
                     val notes = obj.get("notes")?.asString ?: ""
-                    items.add(ExtractedReminderItem(taskTitle = title, detectedDateOrTime = time, notes = notes))
+                    val delayMins = if (obj.has("delayMinutes") && !obj.get("delayMinutes").isJsonNull) {
+                        try { obj.get("delayMinutes").asLong } catch (_: Exception) { null }
+                    } else null
+                    val sendSms = obj.get("sendSms")?.asBoolean ?: false
+                    val smsPhone = obj.get("smsRecipientPhone")?.asString ?: ""
+                    val sendEmail = obj.get("sendEmail")?.asBoolean ?: false
+                    val emailRecip = obj.get("emailRecipient")?.asString ?: ""
+
+                    items.add(
+                        ExtractedReminderItem(
+                            taskTitle = title,
+                            detectedDateOrTime = time,
+                            notes = notes,
+                            delayMinutes = delayMins,
+                            sendSms = sendSms,
+                            smsRecipientPhone = smsPhone,
+                            sendEmail = sendEmail,
+                            emailRecipient = emailRecip
+                        )
+                    )
                 }
             }
             Result.success(items)
